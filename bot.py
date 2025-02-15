@@ -8,13 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters.state import StateFilter
 
-API_TOKEN ='7786266950:AAEwfWggDmjGkcYSB_-5Nfy39nkMdOoP3Fg'
-ADMIN_CHAT_ID =6290849287
-SECOND_ADMIN_CHAT_ID =8041065066
-# API_TOKEN ='7155692669:AAH-RU3Bs4mqEQrqRZWesuQ08y0hlv7u7N4'
-# ADMIN_CHAT_ID =5322589899
-# SECOND_ADMIN_CHAT_ID =6575779781
-# Bot va Dispatcher
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
