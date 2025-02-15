@@ -7,11 +7,13 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters.state import StateFilter
-from decouple import config
 
-API_TOKEN = config('API_TOKEN')
-ADMIN_CHAT_ID = config("ADMIN_CHAT_ID")
-
+API_TOKEN ='7786266950:AAEwfWggDmjGkcYSB_-5Nfy39nkMdOoP3Fg'
+ADMIN_CHAT_ID =6290849287
+SECOND_ADMIN_CHAT_ID =8041065066
+# API_TOKEN ='7155692669:AAH-RU3Bs4mqEQrqRZWesuQ08y0hlv7u7N4'
+# ADMIN_CHAT_ID =5322589899
+# SECOND_ADMIN_CHAT_ID =6575779781
 # Bot va Dispatcher
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
@@ -131,25 +133,29 @@ async def process_resume(message: types.Message, state: FSMContext):
 # Tasdiqlash yoki qaytadan kiritish
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
     user_data = await state.get_data()
+    
     if callback_query.data == "confirm_yes":
         admin_keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="Taklif etish", callback_data=f"offer_{user_data['user_id']}")],
             [InlineKeyboardButton(text="Rad etish", callback_data=f"reject_{user_data['user_id']}")]
         ])
 
-        await bot.send_document(
-            ADMIN_CHAT_ID,
-            document=user_data['resume'],
-            caption=(
-                f"Yangi foydalanuvchi ma'lumotlari:\n"
-                f"ID: {user_data['user_id']}\n"
-                f"Ism: {user_data['name']}\n"
-                f"Familya: {user_data['surname']}\n"
-                f"Yosh: {user_data['age']}\n"
-                f"Lavozim: {user_data['position']}"
-            ),
-            reply_markup=admin_keyboard
-        )
+        # Har ikkita admin uchun xabar yuborish
+        for admin_id in [ADMIN_CHAT_ID, SECOND_ADMIN_CHAT_ID]:
+            await bot.send_document(
+                admin_id,
+                document=user_data['resume'],
+                caption=(
+                    f"Yangi foydalanuvchi ma'lumotlari:\n"
+                    f"ID: {user_data['user_id']}\n"
+                    f"Ism: {user_data['name']}\n"
+                    f"Familya: {user_data['surname']}\n"
+                    f"Yosh: {user_data['age']}\n"
+                    f"Lavozim: {user_data['position']}"
+                ),
+                reply_markup=admin_keyboard
+            )
+
         await callback_query.message.answer("Ma'lumotlaringiz adminga yuborildi. Javobni kuting.")
         await state.clear()
     elif callback_query.data == "confirm_no":
@@ -172,7 +178,6 @@ async def process_message(message: types.Message, state: FSMContext):
         return
 
     text = message.text
-    # Foydalanuvchilarni ma'lumotlar bazasidan olish
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute('SELECT user_id FROM users')
@@ -191,8 +196,6 @@ async def handle_offer(callback_query: types.CallbackQuery, state: FSMContext):
     await state.update_data(offered_user_id=user_id)
     await callback_query.message.answer("Iltimos, uchrashuv vaqtini kiriting (masalan, 2025-01-20 14:00):")
     await state.set_state("waiting_for_time")
-
-from datetime import datetime
 
 async def process_meeting_time(message: types.Message, state: FSMContext):
     user_data = await state.get_data()
